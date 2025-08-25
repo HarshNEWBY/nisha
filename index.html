@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For You, My Love ❤️</title>
+  <style>
+    :root {
+      --bg: #fff5fb;
+      --pink: #ff8fb1;
+      --pink-2: #ff6fa3;
+      --dark: #2a2230;
+      --text: #4b3a50;
+      --heart: #ff3b7a;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: .9; }
+      100% { transform: translateY(-120vh) scale(1.2); opacity: 0; }
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 40px 16px 80px;
+    }
+
+    .card {
+      width: min(760px, 92vw);
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(255, 111, 163, .25);
+      border: 2px solid rgba(255, 111, 163, .35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header {
+      padding: 22px 22px 0;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      letter-spacing: .2px;
+    }
+
+    p.lead { margin: 0 0 18px; opacity: .85; }
+
+    .stage {
+      display: none;
+      padding: 24px;
+      animation: fade .5s ease both;
+      position: relative;
+    }
+
+    .stage.active { display: block; }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .options { display: grid; gap: 10px; margin-top: 18px; }
+    .btn {
+      appearance: none;
+      border: 0;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, var(--pink), var(--pink-2));
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .05s ease, filter .2s ease, box-shadow .2s ease;
+      box-shadow: 0 8px 24px rgba(255, 63, 122, .35);
+    }
+    .btn:active { transform: translateY(1px) scale(.995); }
+
+    .btn.outline {
+      background: transparent;
+      color: var(--pink-2);
+      border: 2px solid var(--pink-2);
+      box-shadow: none;
+    }
+
+    .hint { font-size: 14px; opacity: .8; margin-top: 8px; }
+
+    /* Floating hearts background */
+    .hearts {
+      pointer-events: none;
+      position: fixed; inset: 0; overflow: hidden; z-index: 0;
+    }
+    .heart { position: absolute; bottom: -40px; font-size: 18px; animation: floatUp linear forwards; }
+
+    /* Dark room overlay for stage 3 */
+    .dark-overlay {
+      position: absolute; inset: 0;
+      background: #000; color: #fff;
+      display: grid; place-items: center;
+      font-weight: 700; font-size: 20px;
+      cursor: pointer; user-select: none;
+    }
+    .dark-overlay.hidden { display: none; }
+
+    /* Photo reveal */
+    .photo-wrap { display: grid; place-items: center; gap: 12px; }
+    .photo {
+      width: min(420px, 80vw);
+      aspect-ratio: 3/5; /* keeps layout nice before image loads */
+      background: #ffe3ef;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      transform: scale(.94);
+      transition: transform .6s ease;
+      box-shadow: 0 18px 50px rgba(255, 63, 122, .35);
+    }
+    .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo.zoom { transform: scale(1); }
+
+    /* Final message */
+    .final-msg {
+      font-size: 18px; line-height: 1.5; text-align: center;
+      padding: 8px 12px; margin-top: 10px;
+    }
+
+    footer {
+      text-align: center; padding: 10px 14px 22px; opacity: .75; font-size: 12px;
+    }
+
+    /* Confetti canvas */
+    #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+
+    /* Audio notice */
+    .audio-note { font-size: 12px; opacity: .7; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <!-- floating hearts -->
+  <div class="hearts" id="hearts"></div>
+  <canvas id="confetti"></canvas>
+
+  <div class="wrap">
+    <div class="card" role="main">
+      <header>
+        <h1>Treasure Hunt of Us 💘</h1>
+        <p class="lead">A little adventure from me to you. Ready?</p>
+      </header>
+
+      <!-- Stage 1: Where did we first meet? -->
+      <section class="stage active" id="s1">
+        <h2>Where did we first meet?</h2>
+        <div class="options">
+          <button class="btn wrong">Snapchat</button>
+          <button class="btn correct" data-next="#s2">Instagram</button>
+          <button class="btn wrong">WhatsApp</button>
+        </div>
+        <div class="hint">Choose wisely 😉</div>
+      </section>
+
+      <!-- Stage 2: Where do you live? -->
+      <section class="stage" id="s2">
+        <h2>Where do you live?</h2>
+        <p class="hint">Only the true answer moves us forward.</p>
+        <div class="options">
+          <button class="btn correct" data-next="#s3">Inside my heart</button>
+        </div>
+      </section>
+
+      <!-- Stage 3: Dark page to turn on the light -->
+      <section class="stage" id="s3" style="position: relative;">
+        <div class="dark-overlay" id="dark">
+          OMG, it’s dark here… tap to turn on the light 💡
+        </div>
+        <div style="text-align:center; padding: 30px 10px;">
+          <h2>Much better! ✨</h2>
+          <p>Now that the lights are on, let’s keep going.</p>
+          <button class="btn" data-next="#s4">Next →</button>
+        </div>
+      </section>
+
+      <!-- Stage 4: Mystery girl + Get closer -->
+      <section class="stage" id="s4">
+        <h2>WTF… there’s a girl here… who’s she? 😳</h2>
+        <div class="photo-wrap">
+          <div class="photo" id="photo">
+            <!-- Replace src with your photo file name when you deploy -->
+            <img id="herPic" alt="Her beautiful photo" src="her-photo.jpg" />
+          </div>
+          <button class="btn outline" id="closerBtn">Get closer</button>
+        </div>
+        <div style="text-align:center; margin-top:16px;">
+          <button class="btn" data-next="#s5">I wanna say something…</button>
+        </div>
+      </section>
+
+      <!-- Stage 5: Final message + more love -->
+      <section class="stage" id="s5">
+        <h2>I wanna say something…</h2>
+        <p class="hint">Click for more love</p>
+        <div class="options">
+          <button class="btn" id="loveBtn">Click for more love</button>
+        </div>
+        <div class="final-msg" id="finalMsg" style="display:none;">
+          Sorry, I know I’m wrong… You can beat me up, kill me, IDC — just don’t go far. I love you. ❤️
+        </div>
+      </section>
+
+      <footer>Made with too many hearts and zero distance. 🫶</footer>
+    </div>
+  </div>
+
+  <!-- Background music: drop an MP3 named perfect-instrumental.mp3 in the same folder -->
+  <audio id="bgm" src="perfect-instrumental.mp3" loop></audio>
+
+  <script>
+    // Simple stage navigation
+    document.querySelectorAll('.btn.correct').forEach(btn => {
+      btn.addEventListener('click', () => go(btn.dataset.next));
+    });
+    document.querySelectorAll('.btn.wrong').forEach(btn => btn.addEventListener('click', () => {
+      btn.style.filter = 'grayscale(1)';
+      btn.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}], {duration: 220});
+    }));
+    document.querySelectorAll('[data-next]')
+      .forEach(btn => btn.addEventListener('click', () => go(btn.dataset.next)));
+
+    function go(sel){
+      document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+      document.querySelector(sel).classList.add('active');
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    // Dark overlay toggle
+    const dark = document.getElementById('dark');
+    dark.addEventListener('click', () => dark.classList.add('hidden'));
+
+    // Get closer (photo zoom)
+    const closerBtn = document.getElementById('closerBtn');
+    const photo = document.getElementById('photo');
+    closerBtn.addEventListener('click', () => {
+      photo.classList.toggle('zoom');
+      closerBtn.textContent = photo.classList.contains('zoom') ? 'Aww, closer 🥹' : 'Get closer';
+    });
+
+    // Hearts generator
+    const hearts = document.getElementById('hearts');
+    setInterval(() => {
+      const el = document.createElement('div');
+      el.className = 'heart';
+      el.textContent = '❤';
+      const left = Math.random()*100;
+      const size = 16 + Math.random()*20;
+      const dur = 4000 + Math.random()*4000;
+      el.style.left = left + 'vw';
+      el.style.fontSize = size + 'px';
+      el.style.animationDuration = (dur/1000) + 's';
+      hearts.appendChild(el);
+      setTimeout(() => el.remove(), dur);
+    }, 300);
+
+    // Confetti for final message
+    const loveBtn = document.getElementById('loveBtn');
+    const finalMsg = document.getElementById('finalMsg');
+    const confettiCanvas = document.getElementById('confetti');
+    const ctx = confettiCanvas.getContext('2d');
+    function resize(){ confettiCanvas.width = innerWidth; confettiCanvas.height = innerHeight; }
+    window.addEventListener('resize', resize); resize();
+
+    let confetti = [];
+    function boom(){
+      finalMsg.style.display = 'block';
+      // spawn confetti
+      confetti = Array.from({length: 220}).map(() => ({
+        x: Math.random()*innerWidth,
+        y: -10,
+        r: 4 + Math.random()*6,
+        vy: 2 + Math.random()*4,
+        vx: -2 + Math.random()*4,
+        spin: Math.random()*Math.PI
+      }));
+      requestAnimationFrame(draw);
+      // Try playing music (user gesture already happened)
+      const bgm = document.getElementById('bgm');
+      bgm.volume = 0.6; bgm.play().catch(()=>{});
+    }
+
+    function draw(){
+      ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+      ctx.save();
+      confetti.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.02; p.spin += 0.1;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.spin);
+        ctx.fillStyle = ['#ff3b7a','#ff8fb1','#ffb3cb','#ffd1e1','#ff6fa3'][Math.floor(Math.random()*5)];
+        ctx.fillRect(-p.r,-p.r,p.r*2,p.r*2);
+        ctx.setTransform(1,0,0,1,0,0);
+      });
+      if (confetti.some(p => p.y < innerHeight + 20)) requestAnimationFrame(draw);
+    }
+
+    loveBtn.addEventListener('click', boom);
+
+    // Autoplay hint on iOS/Android: tap anywhere to start music silently
+    document.addEventListener('click', onceStart, { once: true });
+    function onceStart(){
+      const bgm = document.getElementById('bgm');
+      bgm.volume = 0.6; bgm.play().catch(()=>{});
+    }
+  </script>
+</body>
+</html>
